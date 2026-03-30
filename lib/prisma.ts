@@ -18,8 +18,19 @@ const pool = connectionString ? new Pool({
 }) : null;
 
 const prismaClientSingleton = () => {
-  const adapter = pool ? new PrismaPg(pool) : undefined;
-  return new PrismaClient({ adapter } as any);
+  if (!connectionString) {
+    // Return a dummy object during build to prevent constructor validation errors
+    return new Proxy({} as any, {
+      get: (_, prop) => {
+        if (prop === "on" || prop === "$on") return () => {};
+        if (prop === "$connect") return async () => {};
+        if (prop === "$disconnect") return async () => {};
+        return () => { throw new Error(`Prisma accessed during build without DATABASE_URL for: ${String(prop)}`); };
+      },
+    }) as any;
+  }
+  const adapter = new PrismaPg(pool!);
+  return new PrismaClient({ adapter });
 };
 
 declare global {
