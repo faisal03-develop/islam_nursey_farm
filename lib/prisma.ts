@@ -27,7 +27,7 @@ const prismaClientSingleton = () => {
         if (prop === "$disconnect") return async () => {};
         return () => { throw new Error(`Prisma accessed during build without DATABASE_URL for: ${String(prop)}`); };
       },
-    }) as any;
+    }) as unknown as PrismaClient;
   }
   const adapter = new PrismaPg(pool!);
   return new PrismaClient({ adapter });
