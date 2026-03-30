@@ -1,0 +1,202 @@
+// Islam Nursery Farm - Full Management System Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Inventory ────────────────────────────────────────────────────────────────
+model InventoryItem {
+  id           String      @id @default(cuid())
+  name         String
+  sku          String?     @unique
+  category     ItemCategory
+  type         ItemType
+  unit         String      @default("piece") // e.g. piece, kg, litre, tray
+  costPrice    Float       @default(0)
+  sellingPrice Float       @default(0)
+  quantity     Float       @default(0)
+  lowStockAt   Float       @default(10)
+  imageUrl     String?
+  description  String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  batches       Batch[]
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+
+  @@index([category])
+}
+
+model Batch {
+  id           String        @id @default(cuid())
+  batchCode    String        @unique
+  variety      String?
+  size         String?       // e.g. Small, Medium, Large
+  sowingDate   DateTime?
+  stage        GrowthStage   @default(SEEDLING)
+  quantity     Float
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  item         InventoryItem @relation(fields: [itemId], references: [id])
+  itemId       String
+
+  @@index([itemId])
+}
+
+// ─── Sales ────────────────────────────────────────────────────────────────────
+model Sale {
+  id           String      @id @default(cuid())
+  invoiceNo    String      @unique
+  saleType     SaleType    @default(RETAIL)
+  status       SaleStatus  @default(COMPLETED)
+  subtotal     Float
+  discount     Float       @default(0)
+  tax          Float       @default(0)
+  total        Float
+  amountPaid   Float
+  paymentMethod PaymentMethod @default(CASH)
+  notes        String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  customer     Customer?   @relation(fields: [customerId], references: [id])
+  customerId   String?
+  items        SaleItem[]
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+model SaleItem {
+  id        String        @id @default(cuid())
+  quantity  Float
+  unitPrice Float
+  total     Float
+
+  sale      Sale          @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  saleId    String
+  item      InventoryItem @relation(fields: [itemId], references: [id])
+  itemId    String
+
+  @@index([saleId])
+}
+
+// ─── Purchases ────────────────────────────────────────────────────────────────
+model Purchase {
+  id           String         @id @default(cuid())
+  poNumber     String         @unique
+  status       PurchaseStatus @default(RECEIVED)
+  subtotal     Float
+  total        Float
+  notes        String?
+  receivedAt   DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  supplier     Supplier       @relation(fields: [supplierId], references: [id])
+  supplierId   String
+  items        PurchaseItem[]
+
+  @@index([supplierId])
+}
+
+model PurchaseItem {
+  id        String        @id @default(cuid())
+  quantity  Float
+  unitCost  Float
+  total     Float
+
+  purchase  Purchase      @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  purchaseId String
+  item      InventoryItem @relation(fields: [itemId], references: [id])
+  itemId    String
+
+  @@index([purchaseId])
+}
+
+// ─── Customers ────────────────────────────────────────────────────────────────
+model Customer {
+  id           String    @id @default(cuid())
+  name         String
+  phone        String?
+  email        String?
+  address      String?
+  notes        String?
+  totalSpent   Float     @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  sales        Sale[]
+}
+
+// ─── Suppliers ────────────────────────────────────────────────────────────────
+model Supplier {
+  id        String     @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  notes     String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  purchases Purchase[]
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+enum ItemCategory {
+  PLANT
+  POT
+  SOIL
+  FERTILIZER
+  ACCESSORY
+  SEED
+  OTHER
+}
+
+enum ItemType {
+  STOCK_ITEM
+  SERVICE
+}
+
+enum GrowthStage {
+  SEED
+  SEEDLING
+  VEGETATIVE
+  MATURE
+  READY_FOR_SALE
+}
+
+enum SaleType {
+  RETAIL
+  WHOLESALE
+}
+
+enum SaleStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  UPI
+  BANK_TRANSFER
+  CREDIT
+}
+
+enum PurchaseStatus {
+  ORDERED
+  RECEIVED
+  PARTIAL
+  CANCELLED
+}
