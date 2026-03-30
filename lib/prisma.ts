@@ -6,21 +6,20 @@ import { PrismaPg } from "@prisma/adapter-pg";
 // Standard TCP connection pool — fast for Node.js / Neon
 const connectionString = process.env.DATABASE_URL;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set. Check your .env file.");
+if (!connectionString && process.env.NODE_ENV === "production") {
+  console.warn("⚠️ DATABASE_URL is not set. Build might fail if static generation is used.");
 }
 
-const pool = new Pool({
+const pool = connectionString ? new Pool({
   connectionString,
-  // Keep a small pool in dev, larger in prod
   max: process.env.NODE_ENV === "production" ? 10 : 3,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000,
-});
+}) : null;
 
 const prismaClientSingleton = () => {
-  const adapter = new PrismaPg(pool);
-  return new PrismaClient({ adapter });
+  const adapter = pool ? new PrismaPg(pool) : undefined;
+  return new PrismaClient({ adapter } as any);
 };
 
 declare global {
