@@ -29,8 +29,8 @@ export default function SuppliersClient({ suppliers }: { suppliers: Supplier[] }
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
       const res = await createSupplier(fd);
-      if ("error" in res) setMsg({ type: "error", text: res.error as string });
-      else { setMsg({ type: "success", text: res.success }); setShowModal(false); router.refresh(); }
+      if ("error" in res) setMsg({ type: "error", text: (res.error as string) || "An error occurred." });
+      else { setMsg({ type: "success", text: res.success || "Supplier added." }); setShowModal(false); router.refresh(); }
     });
   }
 

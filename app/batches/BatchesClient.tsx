@@ -60,8 +60,8 @@ export default function BatchesClient({ batches, plants }: { batches: Batch[]; p
     const fd = new FormData(e.currentTarget);
     startTransition(async () => {
       const res = await createBatch(fd);
-      if ("error" in res) setMsg({ type: "error", text: res.error });
-      else { setMsg({ type: "success", text: res.success }); setShowModal(false); router.refresh(); }
+      if ("error" in res) setMsg({ type: "error", text: res.error || "An error occurred." });
+      else { setMsg({ type: "success", text: res.success || "Batch created." }); setShowModal(false); router.refresh(); }
     });
   }
 

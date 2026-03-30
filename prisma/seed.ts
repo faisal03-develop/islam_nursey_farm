@@ -20,8 +20,8 @@ async function main() {
     await prisma.inventoryItem.deleteMany();
     await prisma.customer.deleteMany();
     await prisma.supplier.deleteMany();
-  } catch (e) {
-    console.warn('⚠️ Clear failed, proceeding anyway:', e.message);
+  } catch (e: any) {
+    console.warn('⚠️ Clear failed, proceeding anyway:', e?.message || e);
   }
 
   // 2. Seed Suppliers

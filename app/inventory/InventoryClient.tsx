@@ -58,8 +58,8 @@ export default function InventoryClient({
     const fd = new FormData(form);
     startTransition(async () => {
       const result = await createInventoryItem(fd);
-      if ("error" in result) setMsg({ type: "error", text: result.error as string });
-      else { setMsg({ type: "success", text: result.success ? (result.success as string) : "Item added." }); setShowModal(false); form.reset(); }
+      if ("error" in result) setMsg({ type: "error", text: (result.error as string) || "Failed to add item." });
+      else { setMsg({ type: "success", text: (result.success as string) || "Item added." }); setShowModal(false); form.reset(); }
     });
   }
 
