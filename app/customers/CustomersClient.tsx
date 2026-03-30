@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createCustomer, deleteCustomer } from "@/app/actions";
+import { Search, Plus, X, Users, Trash2 } from "lucide-react";
 
 type Customer = {
   id: string; name: string; phone: string | null; email: string | null;
@@ -46,25 +47,25 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
           <h1 className="page-title">Customers</h1>
           <p className="page-desc">{customers.length} customers registered</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Customer</button>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18} /> Add Customer</button>
       </div>
 
       {msg && (
         <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`}>
           {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={18} /></button>
         </div>
       )}
 
       <div className="search-wrap" style={{ marginBottom: "20px" }}>
-        <span className="search-icon">🔍</span>
+        <span className="search-icon"><Search size={18} /></span>
         <input className="search-input" style={{ width: "300px" }} placeholder="Search by name or phone…" value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="card" style={{ padding: 0 }}>
         {filtered.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">👥</div>
+            <div className="empty-icon"><Users size={48} color="var(--text-muted)" /></div>
             <div className="empty-title">No customers found</div>
             <div className="empty-desc">Add your first customer to start tracking sales history.</div>
           </div>
@@ -94,7 +95,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                       {new Date(c.createdAt).toLocaleDateString("en-PK")}
                     </td>
                     <td>
-                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id, c.name)}>🗑</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id, c.name)} title="Delete"><Trash2 size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -109,7 +110,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
           <div className="modal">
             <div className="modal-header">
               <h2 className="modal-title">Add Customer</h2>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}><X size={18} /></button>
             </div>
             <form onSubmit={handleAdd}>
               <div className="modal-body">

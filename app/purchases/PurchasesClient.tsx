@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createPurchase } from "@/app/actions";
+import { Package, History, Plus, X, CheckCircle2 } from "lucide-react";
 
 type InventoryItem = { id: string; name: string; unit: string; costPrice: number; category: string };
 type Supplier = { id: string; name: string; phone: string | null };
@@ -63,7 +64,7 @@ export default function PurchasesClient({
       });
       if ("error" in res && res.error) { setMsg({ type: "error", text: res.error }); return; }
       if (res.success) {
-        setMsg({ type: "success", text: `✅ Purchase recorded! PO: ${res.poNumber}` });
+        setMsg({ type: "success", text: `Purchase recorded! PO: ${res.poNumber}` });
         setSupplierId(""); setNotes(""); setLines([]);
         router.refresh();
       }
@@ -80,15 +81,15 @@ export default function PurchasesClient({
       </div>
 
       {msg && (
-        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`}>
-          {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {msg.type === "success" ? <CheckCircle2 size={18} /> : <X size={18} />} {msg.text}
+          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={18} /></button>
         </div>
       )}
 
       <div className="tabs">
-        <button className={`tab ${tab === "new" ? "active" : ""}`} onClick={() => setTab("new")}>📦 New Purchase</button>
-        <button className={`tab ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>📋 Purchase History</button>
+        <button className={`tab ${tab === "new" ? "active" : ""}`} onClick={() => setTab("new")} style={{ display: "flex", alignItems: "center", gap: "8px" }}><Package size={18} /> New Purchase</button>
+        <button className={`tab ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")} style={{ display: "flex", alignItems: "center", gap: "8px" }}><History size={18} /> Purchase History</button>
       </div>
 
       {tab === "new" && (
@@ -97,7 +98,7 @@ export default function PurchasesClient({
             <div className="card" style={{ marginBottom: "16px" }}>
               <div className="card-header">
                 <div className="card-title">Purchase Items</div>
-                <button className="btn btn-outline btn-sm" onClick={addLine}>+ Add Line</button>
+                <button className="btn btn-outline btn-sm" onClick={addLine} style={{ display: "flex", alignItems: "center", gap: "8px" }}><Plus size={16} /> Add Line</button>
               </div>
               {lines.length === 0 ? (
                 <div style={{ textAlign: "center", padding: "32px", color: "var(--text-muted)", fontSize: "0.875rem" }}>
@@ -113,7 +114,7 @@ export default function PurchasesClient({
                       </select>
                       <input className="form-input" type="number" placeholder="Qty" value={line.qty} min="1" step="0.01" onChange={(e) => updateLine(idx, "qty", parseFloat(e.target.value))} />
                       <input className="form-input" type="number" placeholder="Cost (Rs)" value={line.unitCost} min="0" step="0.01" onChange={(e) => updateLine(idx, "unitCost", parseFloat(e.target.value))} />
-                      <button className="btn btn-danger btn-sm" onClick={() => removeLine(idx)}>✕</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => removeLine(idx)}><X size={14} /></button>
                     </div>
                   ))}
                 </div>
@@ -139,8 +140,8 @@ export default function PurchasesClient({
               <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 800, fontSize: "1.1rem", color: "var(--accent)" }}>
                 <span>Total</span><span>Rs {total.toLocaleString()}</span>
               </div>
-              <button className="btn btn-primary" style={{ width: "100%" }} onClick={handleSubmit} disabled={isPending}>
-                {isPending ? "Recording…" : "📦 Record Purchase"}
+              <button className="btn btn-primary" style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }} onClick={handleSubmit} disabled={isPending}>
+                {isPending ? "Recording…" : <><Package size={18} /> Record Purchase</>}
               </button>
             </div>
           </div>
@@ -151,7 +152,7 @@ export default function PurchasesClient({
         <div className="card" style={{ padding: 0 }}>
           {purchases.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📦</div>
+              <div className="empty-icon"><Package size={48} color="var(--text-muted)" /></div>
               <div className="empty-title">No purchases yet</div>
               <div className="empty-desc">Record your first purchase to update stock.</div>
             </div>

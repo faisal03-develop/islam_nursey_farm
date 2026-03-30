@@ -1,4 +1,106 @@
-            <div className="topbar-title" style={{ display: "flex", alignItems: "center", gap: "10px" }}>{greeting} <Sparkles size={20} color="var(--accent)" /></div>
+import prisma from "@/lib/prisma";
+import Sidebar from "./Sidebar";
+import Link from "next/link";
+import { 
+  Sparkles, 
+  Leaf, 
+  AlertTriangle, 
+  Banknote, 
+  TrendingUp, 
+  Users, 
+  Truck, 
+  ReceiptText, 
+  CheckCircle2, 
+  Package, 
+  Sprout, 
+  BarChart3 
+} from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+async function getDashboardData() {
+  try {
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
+
+    const [
+      totalItems,
+      totalCustomers,
+      totalSuppliers,
+      revenueStats,
+      recentSales,
+      lowStock,
+    ] = await Promise.all([
+      prisma.inventoryItem.count(),
+      prisma.customer.count(),
+      prisma.supplier.count(),
+      prisma.sale.aggregate({
+        _sum: { total: true },
+      }),
+      prisma.sale.findMany({
+        take: 5,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          invoiceNo: true,
+          total: true,
+          paymentMethod: true,
+          customer: { select: { name: true } },
+          items: { select: { id: true } },
+        },
+      }),
+      prisma.inventoryItem.findMany({
+        where: { quantity: { lte: 10 } },
+        take: 5,
+        orderBy: { quantity: "asc" },
+        select: {
+          id: true,
+          name: true,
+          quantity: true,
+          lowStockAt: true,
+          unit: true,
+        },
+      }),
+    ]);
+
+    const todayRevenue = await prisma.sale.aggregate({
+      _sum: { total: true },
+      where: { createdAt: { gte: today } },
+    });
+
+    return {
+      totalItems,
+      lowStockCount: lowStock.length,
+      todayRevenue: todayRevenue._sum.total || 0,
+      totalCustomers,
+      totalSuppliers,
+      totalRevenue: revenueStats._sum.total || 0,
+      recentSales,
+      lowStock,
+    };
+  } catch (e) {
+    console.error("Dashboard error:", e);
+    return {
+      totalItems: 0, lowStockCount: 0, todayRevenue: 0,
+      totalCustomers: 0, totalSuppliers: 0, totalRevenue: 0,
+      recentSales: [], lowStock: [],
+    };
+  }
+}
+
+export default async function DashboardPage() {
+  const data = await getDashboardData();
+  const now = new Date();
+  const greeting = now.getHours() < 12 ? "Good Morning" : now.getHours() < 18 ? "Good Afternoon" : "Good Evening";
+
+  return (
+    <div className="shell">
+      <Sidebar />
+      <div className="main">
+        <div className="topbar">
+          <div>
+            <div className="topbar-title" style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {greeting} <Sparkles size={20} color="var(--accent)" />
+            </div>
           </div>
           <div className="topbar-right">
             <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
@@ -138,12 +240,24 @@
               <div className="card-title">Quick Actions</div>
             </div>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <Link href="/sales" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: "8px" }}><ReceiptText size={16} /> New Sale</Link>
-              <Link href="/inventory" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}><Leaf size={16} /> Add Item</Link>
-              <Link href="/purchases" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}><Package size={16} /> New Purchase</Link>
-              <Link href="/batches" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}><Sprout size={16} /> New Batch</Link>
-              <Link href="/customers" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}><Users size={16} /> Add Customer</Link>
-              <Link href="/reports" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}><BarChart3 size={16} /> View Reports</Link>
+              <Link href="/sales" className="btn btn-primary" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <ReceiptText size={16} /> New Sale
+              </Link>
+              <Link href="/inventory" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Leaf size={16} /> Add Item
+              </Link>
+              <Link href="/purchases" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Package size={16} /> New Purchase
+              </Link>
+              <Link href="/batches" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Sprout size={16} /> New Batch
+              </Link>
+              <Link href="/customers" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Users size={16} /> Add Customer
+              </Link>
+              <Link href="/reports" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <BarChart3 size={16} /> View Reports
+              </Link>
             </div>
           </div>
         </div>

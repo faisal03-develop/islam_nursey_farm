@@ -3,6 +3,7 @@
 import { useState, useTransition, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { createBatch } from "@/app/actions";
+import { Search, Sprout, X, Plus } from "lucide-react";
 
 const STAGES = ["SEED", "SEEDLING", "VEGETATIVE", "MATURE", "READY_FOR_SALE"];
 const STAGE_COLORS: Record<string, string> = {
@@ -71,18 +72,18 @@ export default function BatchesClient({ batches, plants }: { batches: Batch[]; p
           <h1 className="page-title">Batch Tracking</h1>
           <p className="page-desc">Track plant lots by variety, size, sowing date, and growth stage</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ New Batch</button>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18} /> New Batch</button>
       </div>
 
       {msg && (
         <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`}>
           {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={18} /></button>
         </div>
       )}
 
       <div className="search-wrap" style={{ marginBottom: "16px" }}>
-        <span className="search-icon">🔍</span>
+        <span className="search-icon"><Search size={18} /></span>
         <input
           className="search-input"
           style={{ width: "100%", maxWidth: "400px" }}
@@ -117,7 +118,7 @@ export default function BatchesClient({ batches, plants }: { batches: Batch[]; p
       <div className="card" style={{ padding: 0 }}>
         {filtered.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🌱</div>
+            <div className="empty-icon"><Sprout size={48} color="var(--accent)" /></div>
             <div className="empty-title">No batches found</div>
             <div className="empty-desc">Create a batch to start tracking plant lots.</div>
           </div>
@@ -164,7 +165,7 @@ export default function BatchesClient({ batches, plants }: { batches: Batch[]; p
           <div className="modal">
             <div className="modal-header">
               <h2 className="modal-title">New Plant Batch</h2>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}><X size={18} /></button>
             </div>
             <form onSubmit={handleAdd}>
               <div className="modal-body">

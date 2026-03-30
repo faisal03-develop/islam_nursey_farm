@@ -3,6 +3,17 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createSale } from "@/app/actions";
+import { 
+  ReceiptText, 
+  History, 
+  Search, 
+  ShoppingCart, 
+  Plus, 
+  Minus, 
+  X, 
+  CheckCircle2, 
+  CreditCard 
+} from "lucide-react";
 
 type InventoryItem = {
   id: string; name: string; sellingPrice: number; quantity: number; unit: string; category: string;
@@ -70,7 +81,7 @@ export default function SalesClient({
       });
       if ("error" in result && result.error) { setMsg({ type: "error", text: result.error }); return; }
       if (result.success && result.invoiceNo) {
-        setMsg({ type: "success", text: `✅ Sale complete! Invoice: ${result.invoiceNo} — Total: Rs ${total.toLocaleString()}` });
+        setMsg({ type: "success", text: `Sale complete! Invoice: ${result.invoiceNo} — Total: Rs ${total.toLocaleString()}` });
         setCart([]);
         setDiscount(0);
         setNotes("");
@@ -90,15 +101,15 @@ export default function SalesClient({
       </div>
 
       {msg && (
-        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`}>
-          {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {msg.type === "success" ? <CheckCircle2 size={18} /> : <X size={18} />} {msg.text}
+          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={18} /></button>
         </div>
       )}
 
       <div className="tabs">
-        <button className={`tab ${tab === "pos" ? "active" : ""}`} onClick={() => setTab("pos")}>🧾 POS / New Sale</button>
-        <button className={`tab ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>📋 Sales History</button>
+        <button className={`tab ${tab === "pos" ? "active" : ""}`} onClick={() => setTab("pos")} style={{ display: "flex", alignItems: "center", gap: "8px" }}><ReceiptText size={18} /> POS / New Sale</button>
+        <button className={`tab ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")} style={{ display: "flex", alignItems: "center", gap: "8px" }}><History size={18} /> Sales History</button>
       </div>
 
       {tab === "pos" && (
@@ -108,7 +119,7 @@ export default function SalesClient({
             <div className="card" style={{ marginBottom: "16px" }}>
               <div style={{ marginBottom: "12px" }}>
                 <div className="search-wrap">
-                  <span className="search-icon">🔍</span>
+                  <span className="search-icon"><Search size={18} /></span>
                   <input className="search-input" style={{ width: "100%" }} placeholder="Search items to add to cart…" value={search} onChange={(e) => setSearch(e.target.value)} />
                 </div>
               </div>
@@ -129,7 +140,7 @@ export default function SalesClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             <div className="card">
               <div className="card-header">
-                <div className="card-title">🛒 Cart</div>
+                <div className="card-title" style={{ display: "flex", alignItems: "center", gap: "8px" }}><ShoppingCart size={18} color="var(--accent)" /> Cart</div>
                 {cart.length > 0 && (
                   <button className="btn btn-ghost btn-sm" onClick={() => setCart([])}>Clear</button>
                 )}
@@ -144,9 +155,9 @@ export default function SalesClient({
                     <div key={c.id} style={{ display: "flex", alignItems: "center", gap: "8px", padding: "8px", background: "var(--surface-2)", borderRadius: "8px" }}>
                       <div style={{ flex: 1, fontSize: "0.875rem", fontWeight: 600 }}>{c.name}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty - 1)}>-</button>
+                        <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty - 1)}><Minus size={14} /></button>
                         <span style={{ minWidth: "28px", textAlign: "center", fontWeight: 700 }}>{c.qty}</span>
-                        <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty + 1)}>+</button>
+                        <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty + 1)}><Plus size={14} /></button>
                       </div>
                       <div style={{ minWidth: "70px", textAlign: "right", fontWeight: 700, color: "var(--accent)" }}>
                         Rs {(c.sellingPrice * c.qty).toLocaleString()}
@@ -208,8 +219,8 @@ export default function SalesClient({
                   <span>Total</span><span>Rs {total.toLocaleString()}</span>
                 </div>
 
-                <button className="btn btn-primary" style={{ width: "100%", padding: "12px" }} onClick={handleCheckout} disabled={isPending || cart.length === 0}>
-                  {isPending ? "Processing…" : `💳 Complete Sale · Rs ${total.toLocaleString()}`}
+                <button className="btn btn-primary" style={{ width: "100%", padding: "12px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }} onClick={handleCheckout} disabled={isPending || cart.length === 0}>
+                  {isPending ? "Processing…" : <><CreditCard size={18} /> Complete Sale · Rs {total.toLocaleString()}</>}
                 </button>
               </div>
             </div>
@@ -221,7 +232,7 @@ export default function SalesClient({
         <div className="card" style={{ padding: 0 }}>
           {sales.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">🧾</div>
+                <div className="empty-icon"><ReceiptText size={48} color="var(--text-muted)" /></div>
               <div className="empty-title">No sales yet</div>
               <div className="empty-desc">Complete your first sale from the POS screen.</div>
             </div>

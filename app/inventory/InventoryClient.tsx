@@ -3,6 +3,15 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createInventoryItem, deleteInventoryItem } from "@/app/actions";
+import { 
+  Search, 
+  Plus, 
+  X, 
+  CheckCircle2, 
+  XCircle, 
+  Leaf, 
+  Trash2 
+} from "lucide-react";
 
 const CATEGORIES = ["ALL", "PLANT", "POT", "SOIL", "FERTILIZER", "ACCESSORY", "SEED", "OTHER"];
 const UNITS = ["piece", "kg", "litre", "tray", "bag", "bundle", "pack"];
@@ -68,13 +77,13 @@ export default function InventoryClient({
           <h1 className="page-title">Inventory</h1>
           <p className="page-desc">{items.length} items · Track stock, prices, and low-stock alerts</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>+ Add Item</button>
+        <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}><Plus size={18} /> Add Item</button>
       </div>
 
       {msg && (
-        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`}>
-          {msg.type === "success" ? "✅" : "❌"} {msg.text}
-          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}>✕</button>
+        <div className={`alert alert-${msg.type === "success" ? "success" : "error"} mb-4`} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          {msg.type === "success" ? <CheckCircle2 size={18} /> : <XCircle size={18} />} {msg.text}
+          <button onClick={() => setMsg(null)} style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", color: "inherit" }}><X size={18} /></button>
         </div>
       )}
 
@@ -94,7 +103,7 @@ export default function InventoryClient({
 
         <form onSubmit={handleSearch} style={{ marginLeft: "auto", display: "flex", gap: "8px" }}>
           <div className="search-wrap">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon"><Search size={18} /></span>
             <input
               className="search-input"
               placeholder="Search items…"
@@ -110,7 +119,7 @@ export default function InventoryClient({
       <div className="card" style={{ padding: 0 }}>
         {items.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">🌿</div>
+            <div className="empty-icon"><Leaf size={48} color="var(--accent)" /></div>
             <div className="empty-title">No items found</div>
             <div className="empty-desc">Add your first inventory item to get started.</div>
           </div>
@@ -158,8 +167,9 @@ export default function InventoryClient({
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleDelete(item.id)}
+                          title="Delete"
                         >
-                          🗑
+                          <Trash2 size={14} />
                         </button>
                       </td>
                     </tr>
@@ -177,7 +187,7 @@ export default function InventoryClient({
           <div className="modal">
             <div className="modal-header">
               <h2 className="modal-title">Add Inventory Item</h2>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}>✕</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowModal(false)}><X size={18} /></button>
             </div>
             <form onSubmit={handleAddItem}>
               <div className="modal-body">
