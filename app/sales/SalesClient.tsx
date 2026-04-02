@@ -12,7 +12,8 @@ import {
   Minus, 
   X, 
   CheckCircle2, 
-  CreditCard 
+  CreditCard,
+  Trash2
 } from "lucide-react";
 
 type InventoryItem = {
@@ -61,8 +62,11 @@ export default function SalesClient({
   }
 
   function updateQty(id: string, qty: number) {
-    if (qty <= 0) setCart((prev) => prev.filter((c) => c.id !== id));
-    else setCart((prev) => prev.map((c) => c.id === id ? { ...c, qty } : c));
+    setCart((prev) => prev.map((c) => c.id === id ? { ...c, qty: Math.max(0, qty) } : c));
+  }
+
+  function removeFromCart(id: string) {
+    setCart((prev) => prev.filter((c) => c.id !== id));
   }
 
   const subtotal = cart.reduce((s, c) => s + c.sellingPrice * c.qty, 0);
@@ -156,12 +160,31 @@ export default function SalesClient({
                       <div style={{ flex: 1, fontSize: "0.875rem", fontWeight: 600 }}>{c.name}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                         <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty - 1)}><Minus size={14} /></button>
-                        <span style={{ minWidth: "28px", textAlign: "center", fontWeight: 700 }}>{c.qty}</span>
+                        <input 
+                          type="number"
+                          className="cart-qty-input"
+                          value={c.qty === 0 ? "" : c.qty}
+                          onChange={(e) => updateQty(c.id, parseFloat(e.target.value) || 0)}
+                          style={{ 
+                            width: "48px", 
+                            textAlign: "center", 
+                            fontWeight: 700, 
+                            background: "transparent", 
+                            border: "1px solid var(--border)",
+                            borderRadius: "4px",
+                            fontSize: "0.875rem",
+                            color: "var(--text-primary)",
+                            padding: "2px 0"
+                          }}
+                        />
                         <button className="btn btn-ghost btn-sm" style={{ padding: "2px 8px" }} onClick={() => updateQty(c.id, c.qty + 1)}><Plus size={14} /></button>
                       </div>
                       <div style={{ minWidth: "70px", textAlign: "right", fontWeight: 700, color: "var(--accent)" }}>
                         Rs {(c.sellingPrice * c.qty).toLocaleString()}
                       </div>
+                      <button className="btn btn-ghost btn-sm" style={{ color: "var(--danger)" }} onClick={() => removeFromCart(c.id)}>
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -199,7 +222,7 @@ export default function SalesClient({
                 </div>
                 <div className="form-group">
                   <label className="form-label">Discount (Rs)</label>
-                  <input className="form-input" type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} placeholder="0" />
+                  <input className="form-input" type="number" value={discount === 0 ? "" : discount} onChange={(e) => setDiscount(Number(e.target.value))} placeholder="0" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Notes</label>
