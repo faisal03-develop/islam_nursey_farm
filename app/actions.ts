@@ -290,3 +290,13 @@ export async function deleteSupplier(id: string) {
     return { error: "Failed to delete." };
   }
 }
+export async function getLowStockCount() {
+  try {
+    // For large datasets, raw SQL count is much faster than JS filtering
+    const result: any[] = await prisma.$queryRaw`SELECT count(*) as count FROM "InventoryItem" WHERE quantity <= "lowStockAt"`;
+    return Number(result[0]?.count || 0);
+  } catch (e) {
+    console.error(e);
+    return 0;
+  }
+}
