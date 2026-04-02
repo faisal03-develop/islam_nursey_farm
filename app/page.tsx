@@ -29,13 +29,12 @@ async function getDashboardData() {
       revenueStats,
       recentSales,
       lowStock,
+      todayRevenue
     ] = await Promise.all([
       prisma.inventoryItem.count(),
       prisma.customer.count(),
       prisma.supplier.count(),
-      prisma.sale.aggregate({
-        _sum: { total: true },
-      }),
+      prisma.sale.aggregate({ _sum: { total: true } }),
       prisma.sale.findMany({
         take: 5,
         orderBy: { createdAt: "desc" },
@@ -48,34 +47,22 @@ async function getDashboardData() {
           items: { select: { id: true } },
         },
       }),
-      prisma.inventoryItem.findMany({
-        where: { quantity: { lte: 10 } },
-        take: 5,
-        orderBy: { quantity: "asc" },
-        select: {
-          id: true,
-          name: true,
-          quantity: true,
-          lowStockAt: true,
-          unit: true,
-        },
+      prisma.$queryRaw`SELECT id, name, quantity, "lowStockAt", unit FROM "InventoryItem" WHERE quantity <= "lowStockAt" ORDER BY quantity ASC LIMIT 5`,
+      prisma.sale.aggregate({
+        _sum: { total: true },
+        where: { createdAt: { gte: today } },
       }),
     ]);
 
-    const todayRevenue = await prisma.sale.aggregate({
-      _sum: { total: true },
-      where: { createdAt: { gte: today } },
-    });
-
     return {
       totalItems,
-      lowStockCount: lowStock.length,
+      lowStockCount: (lowStock as any[]).length,
       todayRevenue: todayRevenue._sum.total || 0,
       totalCustomers,
       totalSuppliers,
       totalRevenue: revenueStats._sum.total || 0,
       recentSales,
-      lowStock,
+      lowStock: lowStock as any[],
     };
   } catch (e) {
     console.error("Dashboard error:", e);

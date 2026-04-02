@@ -44,8 +44,23 @@ const navItems = [
   },
 ];
 
+import { useState, useEffect } from "react";
+import { getLowStockCount } from "@/app/actions";
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const [lowStock, setLowStock] = useState(0);
+
+  useEffect(() => {
+    async function checkStock() {
+      const count = await getLowStockCount();
+      setLowStock(count);
+    }
+    checkStock();
+    // Re-check every 2 minutes
+    const timer = setInterval(checkStock, 120000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <aside className="sidebar">
@@ -63,16 +78,39 @@ export default function Sidebar() {
         {navItems.map((section) => (
           <div key={section.section}>
             <div className="nav-section-title">{section.section}</div>
-            {section.items.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-item ${pathname === item.href ? "active" : ""}`}
-              >
-                <span className="nav-icon">{item.icon}</span>
-                {item.label}
-              </Link>
-            ))}
+            {section.items.map((item) => {
+              const isInventory = item.href === "/inventory";
+              const isLowStock = isInventory && lowStock > 0;
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`nav-item ${pathname === item.href ? "active" : ""} ${isLowStock ? "blink" : ""}`}
+                >
+                  <span className="nav-icon" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {item.icon}
+                    {isLowStock && (
+                      <span style={{ 
+                        background: "var(--danger)", 
+                        color: "white", 
+                        borderRadius: "50%", 
+                        width: "14px", 
+                        height: "14px", 
+                        fontSize: "9px", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        fontWeight: 900
+                      }}>
+                        {lowStock} 
+                      </span>
+                    )}
+                  </span>
+                  {item.label}
+                </Link>
+              );
+            })}
           </div>
         ))}
       </nav>
