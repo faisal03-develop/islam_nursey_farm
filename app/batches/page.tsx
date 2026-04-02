@@ -47,7 +47,7 @@ export default async function BatchesPage() {
         </div>
         <div className="page-content fade-in">
           <BatchesClient
-            batches={batches.map((b) => ({
+            batches={batches.map((b: any) => ({
               ...b,
               sowingDate: b.sowingDate?.toISOString() ?? null,
               createdAt: b.createdAt.toISOString(),

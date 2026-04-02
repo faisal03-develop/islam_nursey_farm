@@ -1,5 +1,10 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next'
+import { ClerkProvider, SignInButton, SignUpButton, UserButton } from '@clerk/nextjs'
+import { auth } from '@clerk/nextjs/server'
+import { Inter } from 'next/font/google';
+import './globals.css'
+
+const inter = Inter({ subsets: ['latin'], weight: ['300', '400', '500', '600', '700', '800'] });
 
 export const metadata: Metadata = {
   title: "Islam Nursery Farm | Management System",
@@ -7,26 +12,34 @@ export const metadata: Metadata = {
     "Full-featured nursery farm management: inventory, sales, purchases, customers, and analytics.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
-}: {
-  children: React.ReactNode;
-}) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
+  const { userId } = await auth();
+
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body>{children}</body>
-    </html>
-  );
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${inter.className} antialiased`}>
+          <header className="auth-header">
+            {!userId ? (
+              <div style={{ display: "flex", gap: "10px" }}>
+                <SignInButton mode="modal">
+                  <button className="btn btn-ghost btn-sm">Sign In</button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="btn btn-primary btn-sm">Sign Up</button>
+                </SignUpButton>
+              </div>
+            ) : (
+              <UserButton />
+            )}
+          </header>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
+  )
 }
